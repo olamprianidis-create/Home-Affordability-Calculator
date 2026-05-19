@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Affordability Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #b3cfe4;
+      --card:    #476c89;
+      --divider: rgba(255,255,255,0.18);
+      --yellow:  #f3ff03;
+      --purple:  #6d37fc;
+      --white:   #ffffff;
+      --muted:   #777777;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+      padding: 0 16px 64px;
+    }
+
+    .wrap {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    .hdr {
+      padding: 52px 0 32px;
+      text-align: center;
+    }
+
+    .hdr-eye {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #18476b;
+      margin-bottom: 14px;
+    }
+
+    .hdr h1 {
+      font-size: 32px;
+      font-weight: 900;
+      line-height: 1.15;
+      color: #18476b;
+      margin-bottom: 12px;
+    }
+
+    .hdr-sub {
+      font-size: 13px;
+      font-weight: 500;
+      color: #476c89;
+      line-height: 1.6;
+    }
+
+    /* ── Input Card (Purple) ─────────────────────────── */
+    .input-card {
+      background: #18476b;
+      border-radius: 24px;
+      padding: 30px 24px 26px;
+      margin-bottom: 14px;
+    }
+
+    .card-heading {
+      font-size: 30px;
+      font-weight: 900;
+      color: var(--white);
+      margin-bottom: 30px;
+      letter-spacing: -0.5px;
+    }
+
+    /* ── Editable value display ─────────────────────── */
+    .val-editable {
+      cursor: text;
+      border-bottom: 1px dashed rgba(255,255,255,0.2);
+      padding-bottom: 2px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .val-editable:hover  { border-bottom-color: rgba(255,255,255,0.5); }
+    .val-editable:focus  { border-bottom-color: var(--yellow); }
+
+    /* ── Slider Fields ───────────────────────────────── */
+    .slider-field {
+      margin-bottom: 30px;
+    }
+
+    .field-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 10px;
+    }
+
+    /* Value display row */
+    .val-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .val-main {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1;
+    }
+
+    .val-sub {
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.45);
+    }
+
+    /* Range input */
+    .slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 5px;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+      /* background set via JS */
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--yellow);
+      cursor: pointer;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      transition: transform 0.1s;
+    }
+
+    .slider:active::-webkit-slider-thumb {
+      transform: scale(1.18);
+    }
+
+    .slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--yellow);
+      cursor: pointer;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    }
+
+    .slider-ends {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .slider-ends span {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* ── Loan Term Boxes ─────────────────────────────── */
+    .loan-field {
+      margin-bottom: 26px;
+    }
+
+    .loan-boxes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .loan-box {
+      background: rgba(0,0,0,0.25);
+      border: 2px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 20px 12px 16px;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.2s, border-color 0.2s;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .loan-box-years {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1;
+      margin-bottom: 5px;
+      transition: color 0.2s;
+    }
+
+    .loan-box-name {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      transition: color 0.2s;
+    }
+
+    .loan-box.selected {
+      background: var(--yellow);
+      border-color: var(--yellow);
+    }
+
+    .loan-box.selected .loan-box-years { color: #191919; }
+    .loan-box.selected .loan-box-name  { color: rgba(25,25,25,0.6); }
+
+    /* ── Rate Row ────────────────────────────────────── */
+    .rate-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 26px;
+    }
+
+    .rate-inp-wrap {
+      position: relative;
+      flex: 0 0 110px;
+    }
+
+    .rate-inp-wrap input {
+      width: 100%;
+      background: rgba(0,0,0,0.28);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 11px 30px 11px 12px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    .rate-inp-wrap input::-webkit-outer-spin-button,
+    .rate-inp-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .rate-inp-wrap input:focus { border-color: rgba(243,255,3,0.45); }
+
+    .rate-sym {
+      position: absolute;
+      right: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--yellow);
+      pointer-events: none;
+    }
+
+    .rate-badge {
+      flex: 1;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.5);
+      background: rgba(0,0,0,0.2);
+    }
+
+    .rate-badge a { color: inherit; }
+    .rate-badge.live     { color: rgba(243,255,3,0.85); }
+    .rate-badge.fallback { color: #ffaa00; }
+
+    /* ── Calculate Button ────────────────────────────── */
+    .btn {
+      position: relative;
+      overflow: hidden;
+      display: block;
+      width: 100%;
+      background: var(--yellow);
+      color: #18476b;
+      border: 2px solid var(--yellow);
+      border-radius: 14px;
+      padding: 18px 16px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.38s ease;
+    }
+
+    /* Left-to-right sweep overlay */
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 0%;
+      height: 100%;
+      background: #18476b;
+      transition: width 0.38s ease;
+      z-index: 0;
+    }
+
+    .btn:hover { color: var(--yellow); }
+    .btn:hover::before { width: 100%; }
+    .btn:active { transform: scale(.985); }
+
+    .btn > span {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Results Cards ───────────────────────────────── */
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 24px 20px;
+      margin-bottom: 14px;
+    }
+
+    .sec-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 22px;
+    }
+
+    #results { display: none; }
+
+    #results.show {
+      display: block;
+      animation: riseIn .4s ease both;
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Income Hero ─────────────────────────────────── */
+    .income-hero {
+      background: var(--yellow);
+      border-radius: 20px;
+      padding: 36px 20px 28px;
+      margin-bottom: 14px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .income-hero::before {
+      content: '';
+      position: absolute;
+      top: -50px; right: -50px;
+      width: 180px; height: 180px;
+      background: rgba(243,255,3,.06);
+      border-radius: 50%;
+    }
+
+    .income-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -70px; left: -30px;
+      width: 220px; height: 220px;
+      background: rgba(0,0,0,.12);
+      border-radius: 50%;
+    }
+
+    .hero-eye {
+      font-size: 14px; font-weight: 800;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: rgba(255,255,255,.92); margin-bottom: 12px;
+      position: relative; z-index: 1;
+    }
+
+    .hero-amount {
+      font-size: 54px; font-weight: 900;
+      color: var(--yellow); line-height: 1; margin-bottom: 4px;
+      position: relative; z-index: 1;
+    }
+
+    .hero-per-yr {
+      font-size: 14px; font-weight: 600;
+      color: rgba(255,255,255,.8); margin-bottom: 4px;
+      position: relative; z-index: 1;
+    }
+
+    .hero-monthly {
+      font-size: 20px; font-weight: 700;
+      color: rgba(255,255,255,.65); margin-bottom: 22px;
+      position: relative; z-index: 1;
+    }
+
+    .hero-formula {
+      background: rgba(0,0,0,.25); border-radius: 10px;
+      padding: 13px 16px; font-size: 12px; font-weight: 500;
+      color: rgba(255,255,255,.72); line-height: 1.65;
+      text-align: left; position: relative; z-index: 1;
+    }
+
+    /* ── Line Items ──────────────────────────────────── */
+    .line {
+      display: flex; justify-content: space-between;
+      align-items: flex-start;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .line:last-of-type { border-bottom: none; }
+    .line-l { flex: 1; padding-right: 14px; }
+    .line-name { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
+    .line-note { font-size: 11px; font-weight: 500; color: rgba(255,255,255,.62); }
+    .line-val  { font-size: 16px; font-weight: 700; color: var(--white); white-space: nowrap; padding-top: 1px; }
+
+    .tot-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 18px; margin-top: 6px;
+      border-top: 2px solid var(--yellow);
+    }
+
+    .tot-label { font-size: 13px; font-weight: 700; color: var(--yellow); }
+    .tot-val   { font-size: 28px; font-weight: 800; color: var(--yellow); }
+
+    /* ── Step-by-Step Breakdown ──────────────────────── */
+    .steps-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 20px;
+    }
+
+    .step {
+      display: flex;
+      gap: 14px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .step:last-child { border-bottom: none; }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: var(--white);
+      font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 2px;
+    }
+
+    .step-body { flex: 1; }
+
+    .step-math {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+
+    .step-operand {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .step-op {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,.72);
+    }
+
+    .step-result {
+      font-size: 17px;
+      font-weight: 900;
+      color: var(--yellow);
+    }
+
+    .step-desc {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,.68);
+      line-height: 1.65;
+    }
+
+    .step-operand-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .step-sublabel {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.72);
+      text-align: center;
+    }
+
+    /* ── Definitions ─────────────────────────────────── */
+    .defs {
+      padding: 10px 4px 20px;
+    }
+
+    .defs-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .def-item {
+      margin-bottom: 18px;
+    }
+
+    .def-term {
+      font-size: 14px;
+      font-weight: 800;
+      color: #18476b;
+      margin-bottom: 4px;
+    }
+
+    .def-body {
+      font-size: 13px;
+      font-weight: 500;
+      color: #476c89;
+      line-height: 1.6;
+    }
+
+    /* ── Assumptions ─────────────────────────────────── */
+    .assum-row {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--divider);
+      font-size: 12px;
+    }
+
+    .assum-row:last-child { border-bottom: none; }
+    .assum-k { font-weight: 500; color: rgba(255,255,255,.62); flex-shrink: 0; max-width: 48%; }
+    .assum-v { font-weight: 700; color: var(--white); text-align: right; }
+
+    /* ── Footer ──────────────────────────────────────── */
+    footer {
+      text-align: center; padding: 28px 0;
+      font-size: 11px; font-weight: 500;
+      color: #434343; line-height: 1.8;
+    }
+
+    /* ── Monthly Payment Table ────────────────────────── */
+    .sec-heading {
+      font-size: 19px;
+      font-weight: 900;
+      color: var(--white);
+      margin-bottom: 22px;
+      letter-spacing: -0.3px;
+      font-family: 'Montserrat', sans-serif;
+      line-height: 1.2;
+    }
+
+    .pay-layout {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    .pay-table-wrap { flex: 1; min-width: 0; }
+
+    .pay-chart-wrap {
+      flex: 0 0 126px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pie-canvas-box {
+      width: 118px;
+      height: 118px;
+      position: relative;
+    }
+
+    .pay-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .pay-table thead th {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.72);
+      padding: 0 0 14px;
+      text-align: right;
+    }
+
+    .pay-table thead th:first-child { text-align: left; }
+
+    .pay-table tbody td {
+      padding: 10px 0;
+      vertical-align: top;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .pay-table tbody tr:last-child td { border-bottom: none; }
+
+    .pt-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+
+    .pt-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .pt-note {
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(255,255,255,.62);
+      padding-left: 13px;
+    }
+
+    .pt-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--white);
+      text-align: right;
+      white-space: nowrap;
+      padding-left: 8px;
+    }
+
+    .pt-tot {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: right;
+      white-space: nowrap;
+      padding-left: 8px;
+    }
+
+    .pay-table tfoot td { padding-top: 14px; border-top: 2px solid var(--yellow); }
+
+    /* ── Pie Legend ───────────────────────────────────── */
+    .pie-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 100%;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 9px;
+      font-weight: 600;
+      color: rgba(255,255,255,.6);
+      line-height: 1.3;
+    }
+
+    .legend-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Amortization Chart ───────────────────────────── */
+    .amor-chart-wrap {
+      position: relative;
+      height: 230px;
+    }
+
+    .amor-summary {
+      margin-top: 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,.6);
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .amor-summary strong {
+      color: var(--yellow);
+      font-weight: 800;
+    }
+
+    /* ── Logo ────────────────────────────────────────── */
+    .hdr-logo {
+      max-width: 180px;
+      height: auto;
+      display: block;
+      margin: 0 auto 24px;
+    }
+
+    /* ── Income hero: dark text on yellow, no circles ── */
+    .income-hero::before,
+    .income-hero::after       { display: none; }
+    .income-hero .hero-eye     { color: rgba(24,71,107,.7); }
+    .income-hero .hero-amount  { color: #18476b; }
+    .income-hero .hero-monthly { color: rgba(24,71,107,.75); }
+    .income-hero .hero-formula {
+      background: rgba(0,0,0,.1);
+      color: rgba(24,71,107,.8);
+    }
+
+    /* ── Definitions on light bg ─────────────────────── */
+    .defs-label { color: #18476b; }
+
+    /* ── Footer on light bg ──────────────────────────── */
+    footer { color: #476c89; }
+
+    /* ── PDF Download Button ─────────────────────────── */
+    @keyframes pdf-float {
+      0%, 100% { transform: translateY(0);    box-shadow: 0 0 20px rgba(243,255,3,.55), 0 8px 28px rgba(0,0,0,.28); }
+      50%       { transform: translateY(-5px); box-shadow: 0 0 32px rgba(243,255,3,.8),  0 14px 34px rgba(0,0,0,.2); }
+    }
+
+    .pdf-btn {
+      position: relative;
+      overflow: hidden;
+      display: block;
+      width: 100%;
+      background: var(--yellow);
+      color: #18476b;
+      border: 2px solid var(--yellow);
+      border-radius: 14px;
+      padding: 18px 16px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.38s ease;
+      animation: pdf-float 3s ease-in-out infinite;
+      margin: 4px 0 18px;
+    }
+
+    .pdf-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 0%;
+      height: 100%;
+      background: #18476b;
+      transition: width 0.38s ease;
+      z-index: 0;
+    }
+
+    .pdf-btn:hover { animation-play-state: paused; color: var(--yellow); }
+    .pdf-btn:hover::before { width: 100%; }
+    .pdf-btn:active { transform: scale(.985); }
+    .pdf-btn > span { position: relative; z-index: 1; }
+
+    .pdf-btn-sticky {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 528px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 999;
+      animation: none;
+      box-shadow: 0 0 24px rgba(243,255,3,.6), 0 8px 28px rgba(0,0,0,.32);
+    }
+
+    .pdf-btn-sticky.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ── PDF Template (screen: hidden; print: full page) ─ */
+    #pdf-template { display: none; }
+
+    .pdf-page {
+      font-family: 'Montserrat', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .pdf-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid #18476b;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+
+    .pdf-logo { max-height: 52px; width: auto; }
+
+    .pdf-header-right { text-align: right; }
+    .pdf-header-title {
+      font-size: 18px; font-weight: 900;
+      color: #18476b; line-height: 1.1;
+    }
+    .pdf-header-meta {
+      font-size: 10px; font-weight: 600;
+      color: #476c89; letter-spacing: 0.5px;
+      margin-top: 3px;
+    }
+
+    .pdf-config {
+      background: #f0f6fb;
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 20px;
+      margin-bottom: 14px;
+    }
+    .pdf-config span {
+      font-size: 11px; font-weight: 500; color: #476c89;
+    }
+    .pdf-config strong { color: #18476b; font-weight: 800; }
+
+    .pdf-hero {
+      background: #f3ff03;
+      border-radius: 10px;
+      padding: 16px 20px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .pdf-hero-label {
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(24,71,107,.65); margin-bottom: 6px;
+    }
+    .pdf-hero-amount {
+      font-size: 38px; font-weight: 900;
+      color: #18476b; line-height: 1;
+    }
+    .pdf-hero-monthly {
+      font-size: 14px; font-weight: 700;
+      color: rgba(24,71,107,.7); margin-top: 4px;
+    }
+
+    .pdf-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .pdf-section {
+      background: #f0f6fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .pdf-section-title {
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: #18476b; margin-bottom: 10px;
+      border-bottom: 1px solid #cde0ef;
+      padding-bottom: 6px;
+    }
+
+    .pdf-step-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .pdf-step-row:last-child { margin-bottom: 0; }
+
+    .pdf-step-num {
+      flex-shrink: 0;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #18476b;
+      color: #fff;
+      font-size: 11px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 1px;
+    }
+
+    .pdf-step-math {
+      font-size: 12px; font-weight: 600; color: #476c89;
+      margin-bottom: 3px;
+    }
+    .pdf-step-math strong { color: #18476b; font-weight: 900; font-size: 13px; }
+    .pdf-step-result { color: #f3b003 !important; }
+    .pdf-step-desc {
+      font-size: 10px; font-weight: 500; color: #7a9ab5; line-height: 1.5;
+    }
+
+    .pdf-line-table { width: 100%; border-collapse: collapse; }
+    .pdf-line-table td {
+      font-size: 11px; font-weight: 600;
+      padding: 5px 0;
+      border-bottom: 1px solid #ddeaf4;
+      color: #1a1a1a;
+    }
+    .pdf-line-table td:last-child { text-align: right; font-weight: 700; }
+    .pdf-line-table tr:last-child td { border-bottom: none; }
+    .pdf-line-note {
+      font-size: 9px; font-weight: 500;
+      color: #7a9ab5; display: block;
+    }
+    .pdf-total-row td {
+      border-top: 2px solid #18476b !important;
+      border-bottom: none !important;
+      padding-top: 7px !important;
+      color: #18476b !important;
+      font-weight: 900 !important;
+      font-size: 13px !important;
+    }
+
+    .pdf-close-section {
+      background: #f0f6fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+
+    .pdf-close-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 20px;
+    }
+
+    .pdf-disclaimer {
+      font-size: 9px; font-weight: 500;
+      color: #7a9ab5; line-height: 1.5;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    .pdf-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 2px solid #18476b;
+      padding-top: 10px;
+    }
+    .pdf-footer-logo { max-height: 36px; width: auto; }
+    .pdf-footer-info { text-align: right; }
+    .pdf-footer-info div {
+      font-size: 10px; font-weight: 700;
+      color: #18476b; line-height: 1.7;
+    }
+
+    /* ── Print rules ─────────────────────────────────── */
+    @media print {
+      body > * { display: none !important; }
+      #pdf-template { display: block !important; }
+      @page { margin: 0.45in; size: letter portrait; }
+    }
+
+    /* ── Responsive ──────────────────────────────────── */
+    @media (max-width: 380px) {
+      .hdr h1      { font-size: 26px; }
+      .hero-amount { font-size: 42px; }
+      .tot-val     { font-size: 22px; }
+      .val-main    { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ── Header ── -->
+  <header class="hdr">
+    <img src="logo.png" alt="Always Free Financial Wellness" class="hdr-logo">
+    <h1>Home Affordability<br>Calculator</h1>
+    <p class="hdr-sub">Enter a home price and down payment to see exactly<br>how much income you need to afford it.</p>
+  </header>
+
+  <!-- ── Input Card ── -->
+  <div class="input-card">
+    <div class="card-heading">Criteria</div>
+
+    <!-- Home Purchase Price Slider -->
+    <div class="slider-field">
+      <div class="field-label">Home Purchase Price</div>
+      <div class="val-row">
+        <span class="val-main val-editable" id="price-display" contenteditable="true" spellcheck="false">$750,000</span>
+      </div>
+      <input type="range" class="slider" id="inp-price"
+             min="0" max="15000000" step="25000" value="750000">
+      <div class="slider-ends">
+        <span>$0</span>
+        <span>$15,000,000</span>
+      </div>
+    </div>
+
+    <!-- Down Payment Slider -->
+    <div class="slider-field">
+      <div class="field-label">Down Payment</div>
+      <div class="val-row">
+        <span class="val-main val-editable" id="down-pct-display" contenteditable="true" spellcheck="false">20%</span>
+        <span class="val-sub" id="down-dollar-display">$150,000</span>
+      </div>
+      <input type="range" class="slider" id="inp-down"
+             min="0" max="50" step="0.5" value="20">
+      <div class="slider-ends">
+        <span>0%</span>
+        <span>50%</span>
+      </div>
+    </div>
+
+    <!-- Loan Term Boxes -->
+    <div class="loan-field">
+      <div class="field-label">Loan Term</div>
+      <div class="loan-boxes">
+        <button class="loan-box" id="loan-15" onclick="selectLoan(15)">
+          <div class="loan-box-years">15-Year</div>
+          <div class="loan-box-name">Mortgage</div>
+        </button>
+        <button class="loan-box selected" id="loan-30" onclick="selectLoan(30)">
+          <div class="loan-box-years">30-Year</div>
+          <div class="loan-box-name">Mortgage</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mortgage Rate -->
+    <div class="field-label" style="margin-bottom:10px">Fixed Mortgage Rate</div>
+    <div class="rate-row">
+      <div class="rate-inp-wrap">
+        <input id="inp-rate" type="number" placeholder="6.86"
+               min="0.01" max="20" step="0.01" inputmode="decimal">
+        <span class="rate-sym">%</span>
+      </div>
+      <div class="rate-badge loading" id="rate-badge">
+        <span id="rate-msg">Fetching live rate from Freddie Mac…</span>
+      </div>
+    </div>
+
+    <!-- Calculate Button -->
+    <button class="btn" onclick="calculate()">
+      <span>Calculate Affordability</span>
+    </button>
+  </div>
+
+  <!-- ── Results ── -->
+  <div id="results">
+
+    <!-- Definitions -->
+    <div class="defs">
+      <div class="defs-label">Key Terms Explained</div>
+
+      <div class="def-item">
+        <div class="def-term">Gross Income</div>
+        <div class="def-body">Your total income before taxes or any other deductions are taken out — this is the number lenders use when qualifying you for a loan.</div>
+      </div>
+
+      <div class="def-item">
+        <div class="def-term">PITI</div>
+        <div class="def-body">Short for Principal, Interest, Taxes, and Insurance — the four costs that together make up your full monthly home payment.</div>
+      </div>
+
+      <div class="def-item">
+        <div class="def-term">Mortgage Principal</div>
+        <div class="def-body">The original amount of money you borrowed from the bank to buy the home — every monthly payment chips away at this balance over time.</div>
+      </div>
+    </div>
+
+    <!-- Income hero -->
+    <div class="income-hero">
+      <div class="hero-eye">Minimum Gross Annual Income Required</div>
+      <div class="hero-amount" id="o-income-yr">—</div>
+      <div class="hero-monthly" id="o-income-mo">— / month</div>
+      <div class="hero-formula">
+        Using the rule of 30, we took your PITI value (mortgage principal + mortgage interest + property taxes + home insurance) and divided that by 30% to see how much money you need to make to sustainably afford this home! It's that simple.<br><br>
+        <em style="color:rgba(24,71,107,.55)">Still confused? Let's break it down for you below…</em>
+      </div>
+    </div>
+
+    <!-- PDF Download Button -->
+    <div id="pdf-btn-anchor">
+      <button class="pdf-btn" onclick="generatePDF()">
+        <span>&#8595; Download Your Personalized Report</span>
+      </button>
+    </div>
+
+    <!-- Step-by-Step Breakdown -->
+    <div class="card">
+      <h2 class="sec-heading">How We Calculated This</h2>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-math">
+            <div class="step-operand-wrap">
+              <span class="step-sublabel">Monthly Home Payments</span>
+              <span class="step-operand" id="s-piti">—</span>
+            </div>
+            <span class="step-op">÷ 30%</span>
+            <span class="step-op">=</span>
+            <span class="step-result" id="s-mo-income">—</span>
+            <span class="step-op">/&nbsp;month</span>
+          </div>
+          <div class="step-desc">Take your total monthly home payment (PITI) and divide it by 30% — because the Rule of 30 says your housing costs should never exceed 30% of your gross income, so we work backwards to find what you need to earn.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-math">
+            <span class="step-operand" id="s-mo-income-2">—</span>
+            <span class="step-op">× 12 months</span>
+            <span class="step-op">=</span>
+            <span class="step-result" id="s-yr-income">—</span>
+            <span class="step-op">/&nbsp;year</span>
+          </div>
+          <div class="step-desc">Multiply by 12 to convert that monthly figure into an annual salary — that's the gross income you need to comfortably qualify for and sustain this home purchase.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Payment -->
+    <div class="card">
+      <h2 class="sec-heading">Monthly Payment Breakdown</h2>
+
+      <div class="pay-layout">
+        <!-- Table -->
+        <div class="pay-table-wrap">
+          <table class="pay-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Monthly</th>
+                <th style="text-align:center">Total<br>Payments</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="pt-name"><span class="pt-dot" style="background:#f3ff03"></span>Principal &amp; Interest</div>
+                  <div class="pt-note" id="o-pi-note">Fixed amortization</div>
+                </td>
+                <td class="pt-val" id="o-pi">—</td>
+                <td class="pt-tot" id="o-pi-total">—</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="pt-name"><span class="pt-dot" style="background:#67ff4e"></span>Property Taxes</div>
+                  <div class="pt-note">1.25% annual rate &divide; 12</div>
+                </td>
+                <td class="pt-val" id="o-tax">—</td>
+                <td class="pt-tot" id="o-tax-total">—</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="pt-name"><span class="pt-dot" style="background:#a74eff"></span>Home Insurance</div>
+                  <div class="pt-note">$1,200/year &divide; 12 months</div>
+                </td>
+                <td class="pt-val">$100</td>
+                <td class="pt-tot" id="o-ins-total">—</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td><div class="pt-name" style="color:var(--yellow)">Total Monthly</div></td>
+                <td class="pt-val" id="o-piti" style="color:var(--yellow);font-size:17px">—</td>
+                <td class="pt-tot" id="o-piti-total" style="color:var(--yellow)">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Donut Chart -->
+        <div class="pay-chart-wrap">
+          <div class="pie-canvas-box">
+            <canvas id="pie-chart"></canvas>
+          </div>
+          <div class="pie-legend" id="pie-legend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amortization Chart -->
+    <div class="card">
+      <h2 class="sec-heading">Principal, Interest &amp; Payments Over Time</h2>
+      <div class="amor-chart-wrap">
+        <canvas id="amor-chart"></canvas>
+      </div>
+      <div class="amor-summary" id="amor-summary"></div>
+    </div>
+
+    <!-- Cost to Close -->
+    <div class="card">
+      <h2 class="sec-heading">Estimated Cost to Close</h2>
+
+      <div class="line">
+        <div class="line-l">
+          <div class="line-name">Down Payment</div>
+          <div class="line-note" id="o-down-note">purchase price &times; down %</div>
+        </div>
+        <div class="line-val" id="o-down">—</div>
+      </div>
+
+      <div class="line">
+        <div class="line-l">
+          <div class="line-name">Loan Origination Fee</div>
+          <div class="line-note">1% of loan amount</div>
+        </div>
+        <div class="line-val" id="o-orig">—</div>
+      </div>
+
+      <div class="line">
+        <div class="line-l">
+          <div class="line-name">Title Insurance</div>
+          <div class="line-note">0.5% of purchase price</div>
+        </div>
+        <div class="line-val" id="o-title">—</div>
+      </div>
+
+      <div class="line">
+        <div class="line-l">
+          <div class="line-name">Escrow Fees</div>
+          <div class="line-note">Flat estimate</div>
+        </div>
+        <div class="line-val">$2,000</div>
+      </div>
+
+      <div class="line">
+        <div class="line-l">
+          <div class="line-name">Prepaid Property Taxes</div>
+          <div class="line-note">2 months prepaid at 1.25% annual rate</div>
+        </div>
+        <div class="line-val" id="o-pretax">—</div>
+      </div>
+
+      <div class="line">
+        <div class="line-l">
+          <div class="line-name">Prepaid Homeowner's Insurance</div>
+          <div class="line-note">Industry standard estimate</div>
+        </div>
+        <div class="line-val">$1,200</div>
+      </div>
+
+      <div class="tot-row">
+        <span class="tot-label">Total to Close</span>
+        <span class="tot-val" id="o-close">—</span>
+      </div>
+    </div>
+
+    <!-- Assumptions -->
+    <div class="card">
+      <h2 class="sec-heading">Assumptions &amp; Rates Applied</h2>
+
+      <div class="assum-row">
+        <span class="assum-k">Loan Type</span>
+        <span class="assum-v" id="a-loan-type">30-Year Fixed</span>
+      </div>
+      <div class="assum-row">
+        <span class="assum-k">Mortgage Rate Used</span>
+        <span class="assum-v" id="a-rate">—</span>
+      </div>
+      <div class="assum-row">
+        <span class="assum-k">Rate Source</span>
+        <span class="assum-v" id="a-source">—</span>
+      </div>
+      <div class="assum-row">
+        <span class="assum-k">Property Tax Rate</span>
+        <span class="assum-v">1.25%/yr (LA County est.)</span>
+      </div>
+      <div class="assum-row">
+        <span class="assum-k">Tax Rate Basis</span>
+        <span class="assum-v">~0.75% base + special assessments</span>
+      </div>
+      <div class="assum-row">
+        <span class="assum-k">Homeowner's Insurance</span>
+        <span class="assum-v">$1,200/yr ($100/mo)</span>
+      </div>
+      <div class="assum-row">
+        <span class="assum-k">Loan Origination Fee</span>
+        <span class="assum-v">1% of loan amount</span>
+      </div>
+      <div class="assum-row">
+        <span class="assum-k">Title Insurance</span>
+        <span class="assum-v">0.5% of purchase price</span>
+      </div>
+      <div class="assum-row">
+        <span class="assum-k">Escrow Fees</span>
+        <span class="assum-v">$2,000 flat</span>
+      </div>
+      <div class="assum-row">
+        <span class="assum-k">Prepaid Taxes at Close</span>
+        <span class="assum-v">2 months (1.25%/yr &divide; 12 &times; 2)</span>
+      </div>
+      <div class="assum-row">
+        <span class="assum-k">Prepaid Insurance at Close</span>
+        <span class="assum-v">$1,200 flat</span>
+      </div>
+      <div class="assum-row">
+        <span class="assum-k">Income Ratio Applied</span>
+        <span class="assum-v">30% housing-to-gross income</span>
+      </div>
+    </div>
+
+  </div><!-- /#results -->
+
+  <footer>
+    This calculator is for educational purposes only. Estimates are not a guarantee of financing.<br>
+    Actual costs will vary. Please consult a licensed mortgage professional.<br>
+    Rate data sourced from Freddie Mac PMMS &mdash; freddiemac.com/pmms
+  </footer>
+
+</div><!-- /.wrap -->
+
+<!-- Sticky PDF button (shown when in-page anchor scrolls out of view) -->
+<button class="pdf-btn pdf-btn-sticky" id="pdf-btn-sticky" onclick="generatePDF()">
+  <span>&#8595; Download Your Personalized Report</span>
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  let rateSource    = 'Manual entry';
+  let loanTermYrs   = 30;
+  let pieChartInst  = null;
+  let amorChartInst = null;
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  const el  = id => document.getElementById(id);
+  const fmt = n  => '$' + Math.round(n).toLocaleString('en-US');
+
+  // ── Slider fill (yellow left of thumb, dim right) ─────────────────────────
+  function updateFill(slider) {
+    const pct = ((+slider.value - +slider.min) / (+slider.max - +slider.min)) * 100;
+    slider.style.background =
+      `linear-gradient(to right,
+        #f3ff03 0%, #f3ff03 ${pct}%,
+        rgba(255,255,255,0.15) ${pct}%, rgba(255,255,255,0.15) 100%)`;
+  }
+
+  // ── Display helpers ───────────────────────────────────────────────────────
+  function updatePrice() {
+    const price = +el('inp-price').value;
+    el('price-display').textContent = fmt(price);
+    updateFill(el('inp-price'));
+    syncDownDollar();
+  }
+
+  function updateDown() {
+    const pct = +el('inp-down').value;
+    el('down-pct-display').textContent = (pct % 1 === 0 ? pct : pct.toFixed(1)) + '%';
+    updateFill(el('inp-down'));
+    syncDownDollar();
+  }
+
+  function syncDownDollar() {
+    const dollar = +el('inp-price').value * +el('inp-down').value / 100;
+    el('down-dollar-display').textContent = fmt(dollar);
+  }
+
+  // ── Loan term selection ───────────────────────────────────────────────────
+  function selectLoan(years) {
+    loanTermYrs = years;
+    [15, 30].forEach(y =>
+      el(`loan-${y}`).classList.toggle('selected', y === years)
+    );
+  }
+
+  // ── Freddie Mac rate fetch ────────────────────────────────────────────────
+  async function fetchRate() {
+    const badge = el('rate-badge');
+    const msg   = el('rate-msg');
+    const inp   = el('inp-rate');
+
+    try {
+      const ctrl = new AbortController();
+      const t    = setTimeout(() => ctrl.abort(), 9000);
+
+      const res = await fetch(
+        'https://api.allorigins.win/get?url=' + encodeURIComponent('https://www.freddiemac.com/pmms'),
+        { signal: ctrl.signal }
+      );
+      clearTimeout(t);
+
+      if (!res.ok) throw new Error('proxy');
+      const { contents } = await res.json();
+
+      const patterns = [
+        /pmms30[^]*?(\d+\.\d+)/i,
+        /"currentRate"\s*:\s*"?(\d+\.\d+)/i,
+        /30.year[^]{0,120}?(\d+\.\d+)\s*%/i,
+        /(\d+\.\d+)\s*%[^]{0,120}?30.year/i,
+        /class="[^"]*rate[^"]*"[^>]*>\s*(\d+\.\d+)/i,
+      ];
+
+      for (const re of patterns) {
+        const m = contents.match(re);
+        if (m) {
+          const v = parseFloat(m[1]);
+          if (v >= 2 && v <= 15) {
+            inp.value  = v.toFixed(2);
+            rateSource = 'Freddie Mac PMMS (live)';
+            badge.className = 'rate-badge live';
+            msg.textContent = '✓ Live — edit if needed';
+            return;
+          }
+        }
+      }
+      throw new Error('parse');
+
+    } catch {
+      const fallback = 6.86;
+      inp.value  = fallback.toFixed(2);
+      rateSource = 'Fallback estimate (May 2026) — verify at freddiemac.com/pmms';
+      badge.className = 'rate-badge fallback';
+      msg.innerHTML =
+        `⚠ Using ${fallback}% estimate — ` +
+        `<a href="https://www.freddiemac.com/pmms" target="_blank" rel="noopener">verify here</a>`;
+    }
+  }
+
+  // ── Amortization ──────────────────────────────────────────────────────────
+  function calcPI(loan, annualPct, termYrs) {
+    const r = annualPct / 100 / 12;
+    const n = termYrs * 12;
+    if (r === 0) return loan / n;
+    return loan * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  }
+
+  // ── Donut chart ───────────────────────────────────────────────────────────
+  function updatePieChart(pi, tax, ins) {
+    const ctx    = el('pie-chart').getContext('2d');
+    const data   = [Math.round(pi), Math.round(tax), Math.round(ins)];
+    const colors = ['#f3ff03', '#67ff4e', '#a74eff'];
+    const labels = ['Principal & Interest', 'Property Taxes', 'Home Insurance'];
+
+    if (pieChartInst) {
+      pieChartInst.data.datasets[0].data = data;
+      pieChartInst.update();
+    } else {
+      pieChartInst = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }] },
+        options: {
+          cutout: '62%',
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: c => ` ${c.label}: ${fmt(c.raw)}/mo` } }
+          }
+        }
+      });
+    }
+
+    el('pie-legend').innerHTML = labels.map((l, i) =>
+      `<div class="legend-item"><span class="legend-dot" style="background:${colors[i]}"></span>${l}</div>`
+    ).join('');
+  }
+
+  // ── Amortization data ─────────────────────────────────────────────────────
+  function computeAmortization(loan, annualPct, termYrs) {
+    const r = annualPct / 100 / 12;
+    const monthly = calcPI(loan, annualPct, termYrs);
+    let balance = loan, cumInt = 0;
+    const pts = [{ y: 0, bal: Math.round(loan), int: 0, paid: 0 }];
+
+    for (let m = 1; m <= termYrs * 12; m++) {
+      const intPmt = balance * r;
+      balance = Math.max(0, balance - (monthly - intPmt));
+      cumInt += intPmt;
+      if (m % 12 === 0)
+        pts.push({ y: m / 12, bal: Math.round(balance), int: Math.round(cumInt), paid: Math.round(monthly * m) });
+    }
+    return pts;
+  }
+
+  // ── Amortization line chart ───────────────────────────────────────────────
+  function updateAmorChart(pts) {
+    const ctx  = el('amor-chart').getContext('2d');
+    const fmtK = v => '$' + (v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1000 ? Math.round(v/1000)+'K' : v);
+
+    const datasets = [
+      { label: 'Principal Left',      data: pts.map(p => p.bal),  borderColor: '#4ef4ff', backgroundColor: 'rgba(78,244,255,0.07)', fill: true,  tension: 0.35, pointRadius: 0, borderWidth: 2.5 },
+      { label: 'Interest Paid',       data: pts.map(p => p.int),  borderColor: '#67ff4e', backgroundColor: 'transparent',            fill: false, tension: 0.35, pointRadius: 0, borderWidth: 2.5 },
+      { label: 'Total Contribution',  data: pts.map(p => p.paid), borderColor: '#f3ff03', backgroundColor: 'transparent',            fill: false, tension: 0,    pointRadius: 0, borderWidth: 2.5 },
+    ];
+
+    if (amorChartInst) {
+      amorChartInst.data.labels   = pts.map(p => p.y);
+      amorChartInst.data.datasets = datasets;
+      amorChartInst.update();
+    } else {
+      amorChartInst = new Chart(ctx, {
+        type: 'line',
+        data: { labels: pts.map(p => p.y), datasets },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              display: true,
+              labels: {
+                color: 'rgba(255,255,255,.65)',
+                font: { family: 'Montserrat', size: 10, weight: '600' },
+                boxWidth: 20, boxHeight: 2, usePointStyle: true, pointStyle: 'line'
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(25,25,25,.96)',
+              titleColor: 'rgba(255,255,255,.9)',
+              bodyColor:  'rgba(255,255,255,.7)',
+              borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+              callbacks: {
+                title: items => `Year ${items[0].label}`,
+                label: c => ` ${c.dataset.label}: ${fmt(c.raw)}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid:  { color: 'rgba(255,255,255,.06)' },
+              ticks: { color: 'rgba(255,255,255,.4)', font: { family: 'Montserrat', size: 10 }, callback: v => `Yr ${v}` },
+              title: { display: true, text: 'Year', color: 'rgba(255,255,255,.35)', font: { family: 'Montserrat', size: 10 } }
+            },
+            y: {
+              grid:  { color: 'rgba(255,255,255,.06)' },
+              ticks: { color: 'rgba(255,255,255,.4)', font: { family: 'Montserrat', size: 10 }, callback: v => fmtK(v) }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // ── Main calculation ──────────────────────────────────────────────────────
+  function calculate() {
+    const price   = +el('inp-price').value;
+    const downPct = +el('inp-down').value;
+    const rate    = parseFloat(el('inp-rate').value);
+
+    if (!price || price <= 0)
+      return alert('Please select a home purchase price above $0.');
+    if (isNaN(downPct) || downPct < 0 || downPct >= 100)
+      return alert('Please select a valid down payment (0–99%).');
+    if (!rate || rate <= 0 || rate > 20)
+      return alert('Please enter a valid mortgage rate.');
+
+    const down = price * downPct / 100;
+    const loan = price - down;
+
+    // Cost to Close
+    const origFee    = loan * 0.01;
+    const titleIns   = price * 0.005;
+    const escrow     = 2000;
+    const preTax     = (price * 0.0125 / 12) * 2;
+    const preIns     = 1200;
+    const totalClose = down + origFee + titleIns + escrow + preTax + preIns;
+
+    // Monthly PITI
+    const pi        = calcPI(loan, rate, loanTermYrs);
+    const monthTax  = price * 0.0125 / 12;
+    const monthIns  = 100;
+    const totalPITI = pi + monthTax + monthIns;
+
+    // Income needed
+    const annualInc  = (totalPITI / 0.30) * 12;
+    const monthlyInc = annualInc / 12;
+
+    // Render income hero
+    el('o-income-yr').textContent = fmt(annualInc);
+    el('o-income-mo').textContent = fmt(monthlyInc) + ' / month';
+
+    // Step-by-step breakdown
+    el('s-piti').textContent       = fmt(totalPITI);
+    el('s-mo-income').textContent  = fmt(monthlyInc);
+    el('s-mo-income-2').textContent = fmt(monthlyInc);
+    el('s-yr-income').textContent  = fmt(annualInc);
+
+    // Monthly payment
+    el('o-pi').textContent      = fmt(pi);
+    el('o-pi-note').textContent =
+      `${rate}% rate · $${Math.round(loan).toLocaleString()} loan · ${loanTermYrs}-yr`;
+    el('o-tax').textContent  = fmt(monthTax);
+    el('o-piti').textContent = fmt(totalPITI);
+
+    // Totals over loan term
+    const totalMonths = loanTermYrs * 12;
+    el('o-pi-total').textContent   = fmt(pi * totalMonths);
+    el('o-tax-total').textContent  = fmt(monthTax * totalMonths);
+    el('o-ins-total').textContent  = fmt(100 * totalMonths);
+    el('o-piti-total').textContent = fmt(totalPITI * totalMonths);
+
+    // Charts
+    updatePieChart(pi, monthTax, 100);
+    updateAmorChart(computeAmortization(loan, rate, loanTermYrs));
+    el('amor-summary').innerHTML =
+      `After <strong>${loanTermYrs} years</strong>, your total expected home payments add up to <strong>${fmt(totalPITI * totalMonths)}</strong>.`;
+
+    // Cost to close
+    el('o-down-note').textContent = `${downPct}% of $${price.toLocaleString()}`;
+    el('o-down').textContent   = fmt(down);
+    el('o-orig').textContent   = fmt(origFee);
+    el('o-title').textContent  = fmt(titleIns);
+    el('o-pretax').textContent = fmt(preTax);
+    el('o-close').textContent  = fmt(totalClose);
+
+    // Assumptions
+    el('a-loan-type').textContent = `${loanTermYrs}-Year Fixed`;
+    el('a-rate').textContent      = rate.toFixed(2) + '%';
+    el('a-source').textContent    = rateSource;
+
+    // Show results with animation
+    const results = el('results');
+    results.classList.remove('show');
+    void results.offsetWidth;
+    results.style.display = 'block';
+    results.classList.add('show');
+    setTimeout(() => results.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  }
+
+  // ── Event listeners ───────────────────────────────────────────────────────
+  el('inp-price').addEventListener('input', updatePrice);
+  el('inp-down').addEventListener('input', updateDown);
+
+  // ── Editable price display ────────────────────────────────────────────────
+  el('price-display').addEventListener('focus', function() {
+    this.textContent = el('inp-price').value;
+    const range = document.createRange();
+    range.selectNodeContents(this);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+
+  el('price-display').addEventListener('input', function() {
+    const num = Math.min(15000000, parseInt(this.textContent.replace(/[^0-9]/g, '')) || 0);
+    el('inp-price').value = Math.round(num / 25000) * 25000;
+    updateFill(el('inp-price'));
+    syncDownDollar();
+  });
+
+  el('price-display').addEventListener('blur', function() {
+    this.textContent = fmt(+el('inp-price').value);
+  });
+
+  // ── Editable down-payment display ─────────────────────────────────────────
+  el('down-pct-display').addEventListener('focus', function() {
+    this.textContent = el('inp-down').value;
+    const range = document.createRange();
+    range.selectNodeContents(this);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+
+  el('down-pct-display').addEventListener('input', function() {
+    const num = Math.min(50, Math.max(0, parseFloat(this.textContent.replace(/[^0-9.]/g, '')) || 0));
+    el('inp-down').value = Math.round(num * 2) / 2;
+    updateFill(el('inp-down'));
+    syncDownDollar();
+  });
+
+  el('down-pct-display').addEventListener('blur', function() {
+    const pct = +el('inp-down').value;
+    this.textContent = (pct % 1 === 0 ? pct : pct.toFixed(1)) + '%';
+  });
+
+  el('inp-rate').addEventListener('input', () => {
+    rateSource = 'Manual entry';
+    const badge = el('rate-badge');
+    if (!badge.classList.contains('loading')) {
+      badge.className = 'rate-badge live';
+      el('rate-msg').textContent = '✏ Manually entered';
+    }
+  });
+
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+
+  // ── PDF generation ────────────────────────────────────────────────────────
+  function generatePDF() {
+    if (el('o-income-yr').textContent === '—') {
+      alert('Please click "Calculate Affordability" first so we can personalize your report.');
+      return;
+    }
+
+    const price   = +el('inp-price').value;
+    const downPct = +el('inp-down').value;
+    const rate    = parseFloat(el('inp-rate').value);
+    const loan    = price - (price * downPct / 100);
+    const today   = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+    // Config strip
+    el('pdf-date-term').textContent  = today + ' · ' + loanTermYrs + '-Year Fixed';
+    el('pdf-price').textContent      = fmt(price);
+    el('pdf-down-pct').textContent   = downPct + '%';
+    el('pdf-down-amt').textContent   = fmt(price * downPct / 100);
+    el('pdf-rate').textContent       = rate.toFixed(2) + '%';
+    el('pdf-loan-amt').textContent   = fmt(loan);
+
+    // Income hero
+    el('pdf-income-yr').textContent  = el('o-income-yr').textContent + ' / year';
+    el('pdf-income-mo').textContent  = el('o-income-mo').textContent;
+
+    // Steps
+    el('pdf-s-piti').textContent     = el('s-piti').textContent;
+    el('pdf-s-mo').textContent       = el('s-mo-income').textContent;
+    el('pdf-s-mo2').textContent      = el('s-mo-income-2').textContent;
+    el('pdf-s-yr').textContent       = el('s-yr-income').textContent;
+
+    // Monthly payments
+    el('pdf-pi-note').textContent    = el('o-pi-note').textContent;
+    el('pdf-pi').textContent         = el('o-pi').textContent;
+    el('pdf-tax').textContent        = el('o-tax').textContent;
+    el('pdf-piti').textContent       = el('o-piti').textContent;
+
+    // Cost to close
+    el('pdf-down').textContent       = el('o-down').textContent;
+    el('pdf-orig').textContent       = el('o-orig').textContent;
+    el('pdf-title').textContent      = el('o-title').textContent;
+    el('pdf-pretax').textContent     = el('o-pretax').textContent;
+    el('pdf-close').textContent      = el('o-close').textContent;
+
+    window.print();
+  }
+
+  // ── Sticky PDF button (IntersectionObserver) ──────────────────────────────
+  const _stickyBtn = el('pdf-btn-sticky');
+  const _anchor    = el('pdf-btn-anchor');
+  if (_stickyBtn && _anchor) {
+    new IntersectionObserver(entries => {
+      _stickyBtn.classList.toggle('visible', !entries[0].isIntersecting);
+    }, { threshold: 0 }).observe(_anchor);
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  updatePrice();
+  updateDown();
+  fetchRate();
+</script>
+
+<!-- ── PDF Template (hidden on screen, shown when printing) ── -->
+<div id="pdf-template">
+  <div class="pdf-page">
+
+    <!-- Header -->
+    <div class="pdf-header">
+      <img src="logo.png" alt="Always Free Financial Wellness" class="pdf-logo">
+      <div class="pdf-header-right">
+        <div class="pdf-header-title">Home Affordability Report</div>
+        <div class="pdf-header-meta" id="pdf-date-term"></div>
+      </div>
+    </div>
+
+    <!-- Config strip -->
+    <div class="pdf-config">
+      <span>Home Price: <strong id="pdf-price">—</strong></span>
+      <span>Down Payment: <strong id="pdf-down-pct">—</strong> (<strong id="pdf-down-amt">—</strong>)</span>
+      <span>Rate: <strong id="pdf-rate">—</strong></span>
+      <span>Loan: <strong id="pdf-loan-amt">—</strong></span>
+    </div>
+
+    <!-- Income hero -->
+    <div class="pdf-hero">
+      <div class="pdf-hero-label">Minimum Gross Annual Income Required</div>
+      <div class="pdf-hero-amount" id="pdf-income-yr">—</div>
+      <div class="pdf-hero-monthly" id="pdf-income-mo">—</div>
+    </div>
+
+    <!-- Two-column: steps + monthly payment -->
+    <div class="pdf-two-col">
+
+      <!-- Step-by-step -->
+      <div class="pdf-section">
+        <div class="pdf-section-title">How It's Calculated (Rule of 30)</div>
+
+        <div class="pdf-step-row">
+          <div class="pdf-step-num">1</div>
+          <div>
+            <div class="pdf-step-math">
+              <strong id="pdf-s-piti">—</strong> ÷ 30% = <strong class="pdf-step-result" id="pdf-s-mo">—</strong>/mo
+            </div>
+            <div class="pdf-step-desc">Divide total monthly PITI by 30% to find your required monthly gross income.</div>
+          </div>
+        </div>
+
+        <div class="pdf-step-row">
+          <div class="pdf-step-num">2</div>
+          <div>
+            <div class="pdf-step-math">
+              <strong id="pdf-s-mo2">—</strong> × 12 = <strong class="pdf-step-result" id="pdf-s-yr">—</strong>/yr
+            </div>
+            <div class="pdf-step-desc">Multiply by 12 months to convert to the annual income you need.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly payments -->
+      <div class="pdf-section">
+        <div class="pdf-section-title">Monthly Payment Breakdown</div>
+        <table class="pdf-line-table">
+          <tr>
+            <td>
+              Principal &amp; Interest
+              <span class="pdf-line-note" id="pdf-pi-note">—</span>
+            </td>
+            <td id="pdf-pi">—</td>
+          </tr>
+          <tr>
+            <td>
+              Property Taxes
+              <span class="pdf-line-note">1.25% annual ÷ 12</span>
+            </td>
+            <td id="pdf-tax">—</td>
+          </tr>
+          <tr>
+            <td>
+              Home Insurance
+              <span class="pdf-line-note">$1,200/yr ÷ 12</span>
+            </td>
+            <td>$100</td>
+          </tr>
+          <tr class="pdf-total-row">
+            <td>Total Monthly</td>
+            <td id="pdf-piti">—</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Cost to Close -->
+    <div class="pdf-close-section">
+      <div class="pdf-section-title">Estimated Cost to Close</div>
+      <div class="pdf-close-grid">
+        <table class="pdf-line-table">
+          <tr><td>Down Payment</td><td id="pdf-down">—</td></tr>
+          <tr><td>Title Insurance <span class="pdf-line-note">0.5% of price</span></td><td id="pdf-title">—</td></tr>
+          <tr><td>Prepaid Property Taxes <span class="pdf-line-note">2 months</span></td><td id="pdf-pretax">—</td></tr>
+        </table>
+        <table class="pdf-line-table">
+          <tr><td>Loan Origination <span class="pdf-line-note">1% of loan</span></td><td id="pdf-orig">—</td></tr>
+          <tr><td>Escrow Fees</td><td>$2,000</td></tr>
+          <tr><td>Prepaid Insurance</td><td>$1,200</td></tr>
+        </table>
+      </div>
+      <table class="pdf-line-table" style="margin-top:6px">
+        <tr class="pdf-total-row">
+          <td>Total Estimated to Close</td>
+          <td id="pdf-close">—</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="pdf-disclaimer">
+      This report is for educational purposes only and does not constitute financial or mortgage advice.
+      Actual costs will vary. Please consult a licensed mortgage professional before making any decisions.
+    </div>
+
+    <!-- Footer -->
+    <div class="pdf-footer">
+      <img src="logo.png" alt="Always Free Financial Wellness" class="pdf-footer-logo">
+      <div class="pdf-footer-info">
+        <div>www.odysseaslamprianidis.com</div>
+        <div>YouTube: @odysseaslamp</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

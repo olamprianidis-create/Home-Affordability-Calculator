@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/odysseaslamprianidis -maxdepth 4 \\\\\\( -iname \"*logo*\" -o -iname \"*OL*\" -o -iname \"*odysseas*\" -o -iname \"*financial*\" -o -iname \"*wellness*\" \\\\\\) \\\\\\( -name \"*.png\" -o -name \"*.jpg\" -o -name \"*.svg\" -o -name \"*.webp\" \\\\\\) 2>/dev/null | head -20)",
+      "Read(//Users/odysseaslamprianidis/**)"
+    ]
+  }
+}
