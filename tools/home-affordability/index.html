@@ -788,6 +788,8 @@
     .pdf-btn:active { transform: scale(.985); }
     .pdf-btn > span { position: relative; z-index: 1; }
 
+    #pdf-btn-anchor { padding: 0 14px; }
+
     .pdf-btn-sticky {
       position: fixed;
       bottom: 20px;
@@ -1112,7 +1114,7 @@
     <!-- PDF Download Button -->
     <div id="pdf-btn-anchor">
       <button class="pdf-btn" onclick="generatePDF()">
-        <span>&#8595; Download Your Personalized Report</span>
+        <span>&#8595; Download Your Report</span>
       </button>
     </div>
 
@@ -1346,7 +1348,7 @@
 
 <!-- Sticky PDF button (shown when in-page anchor scrolls out of view) -->
 <button class="pdf-btn pdf-btn-sticky" id="pdf-btn-sticky" onclick="generatePDF()">
-  <span>&#8595; Download Your Personalized Report</span>
+  <span>&#8595; Download Your Report</span>
 </button>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1759,7 +1761,8 @@
   const _anchor    = el('pdf-btn-anchor');
   if (_stickyBtn && _anchor) {
     new IntersectionObserver(entries => {
-      _stickyBtn.classList.toggle('visible', !entries[0].isIntersecting);
+      const calculated = el('results').classList.contains('show');
+      _stickyBtn.classList.toggle('visible', calculated && !entries[0].isIntersecting);
     }, { threshold: 0 }).observe(_anchor);
   }
 
