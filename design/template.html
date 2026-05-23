@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>[TOOL NAME] | Financial Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       CSS VARIABLES — Edit here to update all tools at once
+       ============================================================ */
+    :root {
+      /* Backgrounds */
+      --bg-primary:        #B4CFE4;   /* light blue — page base */
+      --bg-card:           #18476B;   /* dark blue — input card & primary result */
+      --bg-secondary:      #476C89;   /* medium blue — secondary result boxes */
+      --bg-input:          #FFFFFF;   /* white — input fields */
+
+      /* Brand Accents */
+      --color-yellow:      #E8FF00;   /* electric yellow — primary CTA */
+      --color-green:       #39FF14;   /* neon green — positive results */
+      --color-red:         #FF3B3B;   /* red — negative results */
+      --color-warning:     #E8FF00;   /* yellow — caution/borderline */
+
+      /* Text */
+      --text-body:         #18476B;   /* dark blue — body text on light bg */
+      --text-header:       #FFFFFF;   /* white — section headers & labels */
+      --text-on-card:      #FFFFFF;   /* white — text inside dark/medium blue */
+      --text-on-yellow:    #0D0D0D;   /* black — text on yellow button */
+      --text-on-green:     #0D0D0D;   /* black — text on green */
+
+      /* Borders */
+      --border-card:       rgba(255,255,255,0.1);
+      --border-input:      #476C89;
+      --border-input-focus:#18476B;
+      --border-divider:    rgba(24,71,107,0.3);
+
+      /* Border Radius */
+      --radius-button:     8px;
+      --radius-card:       12px;
+      --radius-input:      8px;
+      --radius-result:     10px;
+      --radius-badge:      6px;
+
+      /* Spacing */
+      --max-width:         800px;
+      --section-gap:       48px;
+      --card-padding:      28px;
+      --input-gap:         16px;
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-body);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 0 16px;
+    }
+
+    /* ============================================================
+       LAYOUT
+       ============================================================ */
+    .page-wrapper {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 48px 0 80px;
+    }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    .tool-header {
+      margin-bottom: var(--section-gap);
+    }
+
+    .tool-header .eyebrow {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--bg-card);
+      margin-bottom: 10px;
+    }
+
+    .tool-header h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900;
+      color: var(--bg-card);
+      line-height: 1.1;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+
+    .tool-header p {
+      font-size: 0.95rem;
+      color: var(--text-body);
+      max-width: 560px;
+    }
+
+    /* ============================================================
+       SECTION TITLE & DIVIDER
+       ============================================================ */
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-header);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    /* Section title on light background (outside cards) */
+    .section-title.on-light {
+      color: var(--bg-card);
+    }
+
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border-divider);
+      margin: 0 0 20px 0;
+    }
+
+    /* Divider inside dark card */
+    .section-divider.on-dark {
+      border-top-color: rgba(255,255,255,0.15);
+    }
+
+    /* ============================================================
+       INPUT CARD
+       ============================================================ */
+    .inputs-section {
+      margin-bottom: var(--section-gap);
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-card);
+      padding: var(--card-padding);
+      box-shadow: 0 4px 24px rgba(24, 71, 107, 0.25);
+    }
+
+    /* ============================================================
+       INPUTS
+       ============================================================ */
+    .input-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--input-gap);
+      margin-bottom: 24px;
+    }
+
+    @media (min-width: 560px) {
+      .input-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-header);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .input-group input,
+    .input-group select {
+      background: var(--bg-input);
+      border: 1px solid var(--border-input);
+      border-radius: var(--radius-input);
+      color: var(--text-body);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 14px 16px;
+      width: 100%;
+      transition: border-color 0.2s ease;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      border-color: var(--border-input-focus);
+    }
+
+    .input-group input::placeholder {
+      color: #9AACB8;
+      font-weight: 400;
+    }
+
+    /* Input with prefix symbol ($ or %) */
+    .input-with-prefix {
+      position: relative;
+    }
+
+    .input-with-prefix .prefix {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--bg-secondary);
+      font-weight: 700;
+      pointer-events: none;
+      font-size: 0.95rem;
+    }
+
+    .input-with-prefix input {
+      padding-left: 28px;
+    }
+
+    /* ============================================================
+       BUTTON
+       ============================================================ */
+    .btn-primary {
+      display: inline-block;
+      background: var(--color-yellow);
+      color: var(--text-on-yellow);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 14px 40px;
+      border: none;
+      border-radius: var(--radius-button);
+      cursor: pointer;
+      transition: opacity 0.15s ease, transform 0.1s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .btn-secondary {
+      display: inline-block;
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 12px 32px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: var(--radius-button);
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: rgba(255,255,255,0.5);
+      color: #FFFFFF;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* ============================================================
+       RESULTS SECTION
+       ============================================================ */
+    .results-section {
+      display: none;
+    }
+
+    .results-section.visible {
+      display: block;
+    }
+
+    /* Primary result — large featured number */
+    .result-primary {
+      background: var(--bg-card);
+      border-radius: var(--radius-result);
+      padding: 32px 28px;
+      margin-bottom: 16px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(24, 71, 107, 0.25);
+    }
+
+    .result-primary .result-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 10px;
+    }
+
+    .result-primary .result-value {
+      font-size: clamp(2.2rem, 6vw, 3.2rem);
+      font-weight: 700;
+      color: var(--color-yellow);
+      line-height: 1;
+    }
+
+    .result-primary .result-subtext {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 10px;
+    }
+
+    /* Secondary results grid */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 480px) {
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .result-item {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-result);
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(24, 71, 107, 0.15);
+    }
+
+    .result-item .result-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 6px;
+    }
+
+    .result-item .result-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    /* Semantic result states */
+    .result-item.positive .result-value { color: var(--color-green); }
+    .result-item.warning  .result-value { color: var(--color-warning); }
+    .result-item.negative .result-value { color: var(--color-red); }
+
+    /* ============================================================
+       BADGE
+       ============================================================ */
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 10px;
+      border-radius: var(--radius-badge);
+    }
+
+    .badge-yellow  { background: var(--color-yellow); color: var(--text-on-yellow); }
+    .badge-dark    { background: var(--bg-card);       color: #FFFFFF; }
+    .badge-green   { background: var(--color-green);   color: var(--text-on-green); }
+    .badge-red     { background: var(--color-red);     color: #FFFFFF; }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .tool-footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-divider);
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--bg-secondary);
+      font-weight: 400;
+    }
+
+    .tool-footer a {
+      color: var(--bg-card);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .tool-footer a:hover {
+      color: var(--bg-card);
+      text-decoration: underline;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="page-wrapper">
+
+    <!-- ===================== HEADER ===================== -->
+    <header class="tool-header">
+      <p class="eyebrow">Financial Tools</p>
+      <h1>[TOOL NAME]</h1>
+      <p>[One sentence description of what this tool calculates and who it helps.]</p>
+    </header>
+
+    <!-- ===================== INPUTS ===================== -->
+    <section class="inputs-section">
+
+      <h2 class="section-title on-light">Your Numbers</h2>
+      <hr class="section-divider" />
+
+      <div class="card">
+
+        <div class="input-grid">
+
+          <!-- INPUT 1 — Replace with actual input -->
+          <div class="input-group">
+            <label for="input1">[Input Label]</label>
+            <div class="input-with-prefix">
+              <span class="prefix">$</span>
+              <input
+                type="number"
+                id="input1"
+                placeholder="0"
+                min="0"
+              />
+            </div>
+          </div>
+
+          <!-- INPUT 2 — Replace with actual input -->
+          <div class="input-group">
+            <label for="input2">[Input Label]</label>
+            <div class="input-with-prefix">
+              <span class="prefix">%</span>
+              <input
+                type="number"
+                id="input2"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+              />
+            </div>
+          </div>
+
+          <!-- INPUT 3 — Replace or remove -->
+          <div class="input-group">
+            <label for="input3">[Input Label]</label>
+            <input
+              type="number"
+              id="input3"
+              placeholder="0"
+              min="0"
+            />
+          </div>
+
+          <!-- INPUT 4 — Replace or remove -->
+          <div class="input-group">
+            <label for="input4">[Input Label]</label>
+            <input
+              type="number"
+              id="input4"
+              placeholder="0"
+              min="0"
+            />
+          </div>
+
+        </div><!-- /input-grid -->
+
+        <div class="btn-row">
+          <button class="btn-primary" onclick="calculate()">Calculate</button>
+          <button class="btn-secondary" onclick="resetTool()">Reset</button>
+        </div>
+
+      </div><!-- /card -->
+    </section>
+
+    <!-- ===================== RESULTS ===================== -->
+    <section class="results-section" id="results">
+
+      <h2 class="section-title on-light">Your Results</h2>
+      <hr class="section-divider" />
+
+      <!-- PRIMARY RESULT — Big headline number -->
+      <div class="result-primary">
+        <div class="result-label">[Primary Result Label]</div>
+        <div class="result-value" id="primary-result">$0</div>
+        <div class="result-subtext">[Optional supporting context line]</div>
+      </div>
+
+      <!-- SECONDARY RESULTS GRID -->
+      <div class="results-grid">
+
+        <div class="result-item" id="result-item-1">
+          <div class="result-label">[Label]</div>
+          <div class="result-value" id="secondary-result-1">—</div>
+        </div>
+
+        <div class="result-item" id="result-item-2">
+          <div class="result-label">[Label]</div>
+          <div class="result-value" id="secondary-result-2">—</div>
+        </div>
+
+        <div class="result-item" id="result-item-3">
+          <div class="result-label">[Label]</div>
+          <div class="result-value" id="secondary-result-3">—</div>
+        </div>
+
+        <div class="result-item" id="result-item-4">
+          <div class="result-label">[Label]</div>
+          <div class="result-value" id="secondary-result-4">—</div>
+        </div>
+
+      </div><!-- /results-grid -->
+
+    </section><!-- /results-section -->
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer class="tool-footer">
+      <p>Built by <a href="https://www.odysseaslamprianidis.com" target="_blank">Odysseas Lamprianidis</a> &nbsp;·&nbsp; No data collected &nbsp;·&nbsp; Everything runs in your browser</p>
+    </footer>
+
+  </div><!-- /page-wrapper -->
+
+  <script>
+    // ============================================================
+    // HELPER FUNCTIONS — Keep these, use them in every tool
+    // ============================================================
+
+    // Format number as currency: 1500000 → "$1,500,000"
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    // Format number as percentage: 0.065 → "6.5%"
+    function formatPercent(value, decimals = 1) {
+      return (value * 100).toFixed(decimals) + '%';
+    }
+
+    // Format plain number with commas: 1500000 → "1,500,000"
+    function formatNumber(value) {
+      return new Intl.NumberFormat('en-US').format(Math.round(value));
+    }
+
+    // Set semantic color on a result item: 'positive' | 'warning' | 'negative'
+    function setResultState(elementId, state) {
+      const el = document.getElementById(elementId);
+      el.classList.remove('positive', 'warning', 'negative');
+      if (state) el.classList.add(state);
+    }
+
+    // Show the results section
+    function showResults() {
+      document.getElementById('results').classList.add('visible');
+      document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ============================================================
+    // CALCULATE — Replace this logic with the tool's actual math
+    // ============================================================
+    function calculate() {
+      // 1. Read input values
+      const input1 = parseFloat(document.getElementById('input1').value) || 0;
+      const input2 = parseFloat(document.getElementById('input2').value) || 0;
+      const input3 = parseFloat(document.getElementById('input3').value) || 0;
+      const input4 = parseFloat(document.getElementById('input4').value) || 0;
+
+      // 2. Validate — basic example
+      if (input1 <= 0) {
+        alert('Please enter a value for [Input 1].');
+        return;
+      }
+
+      // 3. Calculate — replace with actual formulas
+      const primaryResult    = input1 * (input2 / 100);
+      const secondaryResult1 = input1 + input3;
+      const secondaryResult2 = input2 - input4;
+      const secondaryResult3 = primaryResult / 12;
+      const secondaryResult4 = (primaryResult / input1) * 100;
+
+      // 4. Display primary result
+      document.getElementById('primary-result').textContent = formatCurrency(primaryResult);
+
+      // 5. Display secondary results
+      document.getElementById('secondary-result-1').textContent = formatCurrency(secondaryResult1);
+      document.getElementById('secondary-result-2').textContent = formatPercent(secondaryResult2 / 100);
+      document.getElementById('secondary-result-3').textContent = formatCurrency(secondaryResult3);
+      document.getElementById('secondary-result-4').textContent = secondaryResult4.toFixed(1) + '%';
+
+      // 6. Apply semantic colors based on thresholds — adjust logic per tool
+      setResultState('result-item-1', secondaryResult1 < 500000 ? 'positive' : 'warning');
+      setResultState('result-item-4', secondaryResult4 < 30 ? 'positive' : secondaryResult4 < 43 ? 'warning' : 'negative');
+
+      // 7. Show results
+      showResults();
+    }
+
+    // ============================================================
+    // RESET
+    // ============================================================
+    function resetTool() {
+      document.querySelectorAll('input').forEach(el => el.value = '');
+      document.getElementById('results').classList.remove('visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+
+</body>
+</html>
